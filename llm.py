@@ -43,7 +43,8 @@ def get_retrievalQA():
 
     database = get_database()
 
-    prompt = hub.pull('rlm/rag-prompt', api_key=LANGCHAIN_API_KEY)
+    # prompt = hub.pull('rlm/rag-prompt', api_key=LANGCHAIN_API_KEY)
+    prompt = hub.pull("lololll0o/rag-prompt", api_key=LANGCHAIN_API_KEY)
 
     # llm 모델 지정
     llm = get_llm()
