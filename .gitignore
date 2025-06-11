@@ -2,6 +2,10 @@
 chat-01.py
 test.py
 .env
+chat copy.py
+llm copy.py
+
 
 #폴더
 /__pycache__
+chatbot-project/

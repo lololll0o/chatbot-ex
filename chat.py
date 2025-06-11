@@ -24,11 +24,14 @@ if user_question := st.chat_input(placeholder=placeholder): #prompt 창(채팅�
     st.session_state.message_list.append({'role': 'user', 'content': user_question})
 
     with st.spinner(text="답변을 생성중입니다."):
-        ai_msg = get_ai_message(user_question)
+        # ai_msg = get_ai_message(user_question)
+
+        session_id = 'user-session'
+        ai_msg = get_ai_message(user_question, session_id=session_id)
 
         with st.chat_message('ai'):
             #AI msg 화면 출력
             st.write(ai_msg)
         st.session_state.message_list.append({'role':'ai', 'content':ai_msg})
 
-print(f'after: {st.session_state.message_list}')
+# print(f'after: {st.session_state.message_list}')
