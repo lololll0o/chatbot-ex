@@ -21,9 +21,9 @@ if user_question := st.chat_input(placeholder=placeholder): #prompt 창(채팅�
     with st.chat_message('user'):
         # 사용자 msg 화면 출력
         st.write(user_question)
-    st.session_state.message_list.append({'role': 'user', 'content': user_question})
+    st.session_state.message_list.append({'role': 'user', "content": user_question})
 
-    with st.spinner(text="답변을 생성중입니다."):
+    with st.spinner("답변을 생성중입니다."):
         # ai_msg = get_ai_message(user_question)
 
         session_id = 'user-session'
@@ -31,7 +31,7 @@ if user_question := st.chat_input(placeholder=placeholder): #prompt 창(채팅�
 
         with st.chat_message('ai'):
             #AI msg 화면 출력
-            st.write(ai_msg)
-        st.session_state.message_list.append({'role':'ai', 'content':ai_msg})
+            ai_msg = st.write_stream(ai_msg)
+        st.session_state.message_list.append({'role':'ai', "content":ai_msg})
 
 # print(f'after: {st.session_state.message_list}')

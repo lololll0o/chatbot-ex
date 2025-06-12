@@ -4,6 +4,7 @@ test.py
 .env
 chat copy.py
 llm copy.py
+llm_before.py
 
 
 #폴더
