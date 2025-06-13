@@ -3,7 +3,7 @@ from llm import stream_ai_message
 
 
 st.set_page_config(page_title='전세사기피해 상담 챗봇', page_icon='📢')
-st.title("🤖전세사기피해 챗봇상담⚖")
+st.title("전세사기피해 챗봇상담⚖")
 
 
 if 'message_list' not in st.session_state:
