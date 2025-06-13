@@ -2,11 +2,8 @@
 chat-01.py
 test.py
 .env
-chat copy.py
-llm copy.py
-llm_before.py
-
 
 #폴더
 /__pycache__
 chatbot-project/
+/secret
