@@ -89,42 +89,33 @@ def build_few_shot_examples() -> str :
 
     return formmated_few_shot_prompt
 
+# 외부 사전 로드
+import json
+
+def load_json_from_file(path="keyword_dictionary.json"):
+    with open(path, 'r', encoding="utf-8") as f:
+        return json.load(f)
+
+# 함수 설명 : load json file 에서 dictionary.json파일을 읽어와서 load_dictionary에 읽은 파일 넣어주기. >> 간소화를 위해 바로 json.load(f)로 생략
+
+def build_dictionary_text(dictionary: dict) -> str:
+    # dictionary_text = '\n'.join([f"{k}({v['tags']}) : [정의 : {v['definition']}] [출처: {v['source']}] " for k, v in dictionary.items()])
+    dictionary_text = '\n'.join(
+        [f"{k}({','.join(v['tags'])}) : [정의 : {v['definition']}] [출처 : {v['source']}]" 
+        for k, v in dictionary.items()]
+    )
+
+    print(dictionary_text)
+    return dictionary_text
+# 함수 설명 : (dictionary : dict)< keyword_dictionary가 들어올 예정 .
+
 
 def build_qa_prompt():
-    # [keyword dictionary]
-    # 1. 기본 형태 (일반적인 형태)
-    # * 키 하나당 설명 하나, 단순 + 빠름
-    # * 용도:실무활용, ex)FAQ 챗봇, 버튼식 응답
-    ## 키워드_사전
-    # keyword_dictionary = {
-    #     "임대인" : "임대인은 임대차 계약에서 주택이나 그 외의 부동산을 임차인에게 일정한 기간 동안 빌려주는 사람을 말합니다. 임대인은 임차인이 사용하는 부동산에 대해 소유권을 가지며, 임차인으로부터 임대료를 받습니다.",
-    #     "주택" : "주택이란 「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
-    # }
 
-    # 2. 질문형 키워드 (질문 다양성 대응)
-    # 장점 : 유사 질문을 여러 키로 분기하여 모두 같은 대답으로 연결, fallback 대응
-    # 용도 : 단답 챗봇, 키워드 FAQ챗봇
-    # keyword_dictionary = {
-    #     "임대인 알려줘" : "임대인은 임대차 계약에서 주택이나 그 외의 부동산을 임차인에게 일정한 기간 동안 빌려주는 사람을 말합니다. 임대인은 임차인이 사용하는 부동산에 대해 소유권을 가지며, 임차인으로부터 임대료를 받습니다.",
-    #     "주택" : "주택이란 「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
-    # }
-
-    # 3. 키워드 + 태그 기반 딕셔너리
-    keyword_dictionary = {
-        "임대인" : {
-            "definition" : "전세사기피해자법 제 2조 제 2항에 따른 임대인 정의입니다.",
-            "source" : "전세사기피해자법 제 2조",
-            "tags" : ["법률", "용어", "기초"],
-        },
-        "주택" : {
-            "definition" : "「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
-            "source" : "주택임대차보호법 제 2조",
-            "tags" : ["법률", "정의"]
-        }
-    }
-    dictionary_text = '\n'.join([f"{k}({v['tags']}) : [정의 : {v['definition']}] [출처: {v['source']}] " for k, v in keyword_dictionary.items()])
+    keyword_dictionary = load_json_from_file()
+    dictionary_text = build_dictionary_text(keyword_dictionary)
+ # 설명 : load_json_from_file 에서 json파일을 가져온 후 python에서 읽을 수 있게 변환 > 그 읽은 파일에서 키, 값만 빼와서 dictionary_text에 저장. > 그 값을 dictionary_text로 정의.
         
-
     system_prompt = (
     '''[identity]
 -너는 전세사기피해 법률 전문가야.
