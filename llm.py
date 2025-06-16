@@ -91,15 +91,52 @@ def build_few_shot_examples() -> str :
 
 
 def build_qa_prompt():
+    # [keyword dictionary]
+    # 1. 기본 형태 (일반적인 형태)
+    # * 키 하나당 설명 하나, 단순 + 빠름
+    # * 용도:실무활용, ex)FAQ 챗봇, 버튼식 응답
+    ## 키워드_사전
+    # keyword_dictionary = {
+    #     "임대인" : "임대인은 임대차 계약에서 주택이나 그 외의 부동산을 임차인에게 일정한 기간 동안 빌려주는 사람을 말합니다. 임대인은 임차인이 사용하는 부동산에 대해 소유권을 가지며, 임차인으로부터 임대료를 받습니다.",
+    #     "주택" : "주택이란 「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
+    # }
+
+    # 2. 질문형 키워드 (질문 다양성 대응)
+    # 장점 : 유사 질문을 여러 키로 분기하여 모두 같은 대답으로 연결, fallback 대응
+    # 용도 : 단답 챗봇, 키워드 FAQ챗봇
+    # keyword_dictionary = {
+    #     "임대인 알려줘" : "임대인은 임대차 계약에서 주택이나 그 외의 부동산을 임차인에게 일정한 기간 동안 빌려주는 사람을 말합니다. 임대인은 임차인이 사용하는 부동산에 대해 소유권을 가지며, 임차인으로부터 임대료를 받습니다.",
+    #     "주택" : "주택이란 「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
+    # }
+
+    # 3. 키워드 + 태그 기반 딕셔너리
+    keyword_dictionary = {
+        "임대인" : {
+            "definition" : "전세사기피해자법 제 2조 제 2항에 따른 임대인 정의입니다.",
+            "source" : "전세사기피해자법 제 2조",
+            "tags" : ["법률", "용어", "기초"],
+        },
+        "주택" : {
+            "definition" : "「주택임대차보호법」 제2조에 따른 주거용 건물(공부상 주거용 건물이 아니라도 임대차계약 체결 당시 임대차목적물의 구조와 실질이 주거용 건물이고 임차인의 실제 용도가 주거용인 경우를 포함한다)을 말한다.",
+            "source" : "주택임대차보호법 제 2조",
+            "tags" : ["법률", "정의"]
+        }
+    }
+    dictionary_text = '\n'.join([f"{k}({v['tags']}) : [정의 : {v['definition']}] [출처: {v['source']}] " for k, v in keyword_dictionary.items()])
+        
+
     system_prompt = (
     '''[identity]
 -너는 전세사기피해 법률 전문가야.
 -[context]를 참고하여 사용자의 질문에 답변해.
+-[context]에서 알아낼 수 없는 답변은 [keyword_dictionary]에서 가져와서 답변 퀄리티를 높여.
 -답변 마지막엔 "더 많은 내용은 (너가 참고한 법령 ex) ~법 ~조)에 있습니다."라고 코멘트 달아줘.
 -전세사기피해 법률 관련 이외의 질문에는 "답변할 수 없습니다"라고 출력해.
 
 [Context]
 {context} 
+[keyword_dictionary]
+{dictionary_text}
 '''
     )
     
@@ -111,7 +148,9 @@ def build_qa_prompt():
             MessagesPlaceholder("chat_history"),
             ("human", "{input}"),
         ]
-    )
+    ).partial(dictionary_text=dictionary_text)
+
+    print("\nqa_prompt :\n", qa_prompt.partial_variables)
 
     return qa_prompt
 
@@ -155,4 +194,14 @@ def stream_ai_message(user_message, session_id='default'):
     print(f'대화 이력 >> { get_session_history(session_id)}\n\n')
     print('='*50+'\n')
     print(f'[stream_ai_message 함수 내 출력]session_id >>{session_id}')
+
+
+
+    ###
+    # Vectorstore에서 검색된 문서 출력
+    retriever = load_vectorstore().as_retriever(search_kwargs={'k': 1})
+    search_result = retriever.invoke(user_message)
+
+
+
     return ai_message
